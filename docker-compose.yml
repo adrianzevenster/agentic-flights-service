@@ -1,0 +1,87 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: flight_service
+      POSTGRES_USER: flight_user
+      POSTGRES_PASSWORD: flight_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flight_user -d flight_service"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+    environment:
+      QDRANT__TELEMETRY_DISABLED: "true"
+      # IMPORTANT: this belongs on qdrant, not api
+      QDRANT__SERVICE__MAX_REQUEST_SIZE: "134217728"
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11435:11434"   # host:container
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_CHAT_MODEL: llama3.1:8b
+      OLLAMA_EMBED_MODEL: nomic-embed-text
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_FLIGHTS_COLLECTION: flights
+      DATABASE_URL: postgresql+psycopg://flight_user:flight_pass@postgres:5432/flight_service
+
+      # App tuning (matches your config defaults; override here if needed)
+      MAX_TOOL_RESULTS: "20"
+      INGEST_EMBED_BATCH_SIZE: "64"
+      INGEST_UPSERT_BATCH_SIZE: "200"
+      INGEST_LIMIT_DEFAULT: "0"
+      QDRANT_TIMEOUT_SECONDS: "30"
+
+    depends_on:
+      - postgres
+      - qdrant
+      - ollama
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/readyz').read(); print('ok')\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  ui:
+    build:
+      context: .
+    command: ["streamlit", "run", "ui/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    environment:
+      API_BASE: http://api:8000
+    depends_on:
+      - api
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  qdrant_data:
+  ollama_data:

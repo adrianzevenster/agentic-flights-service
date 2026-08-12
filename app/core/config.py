@@ -1,27 +1,25 @@
-from pydantic import BaseModel
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseModel):
-    OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    OLLAMA_CHAT_MODEL: str = os.getenv("OLLAMA_CHAT_MODEL", "llama3.1:8b")
-    OLLAMA_EMBED_MODEL: str = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    QDRANT_URL: str = os.getenv("QDRANT_URL", "http://localhost:6333")
-    QDRANT_FLIGHTS_COLLECTION: str = os.getenv("QDRANT_FLIGHTS_COLLECTION", "flights")
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    OLLAMA_CHAT_MODEL: str = "llama3.1:8b"
+    OLLAMA_EMBED_MODEL: str = "nomic-embed-text"
 
-    QDRANT_TIMEOUT_SECONDS: int = int(os.getenv("QDRANT_TIMEOUT_SECONDS", "30"))
+    QDRANT_URL: str = "http://localhost:6333"
+    QDRANT_FLIGHTS_COLLECTION: str = "flights"
+    QDRANT_TIMEOUT_SECONDS: int = 30
 
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        "postgresql+psycopg://flight_user:flight_pass@localhost:5432/flight_service",
-    )
+    DATABASE_URL: str = "postgresql+psycopg://flight_user:flight_pass@localhost:5432/flight_service"
 
-    MAX_TOOL_RESULTS: int = int(os.getenv("MAX_TOOL_RESULTS", "20"))
+    MAX_TOOL_RESULTS: int = 20
+    RETRIEVAL_SCORE_THRESHOLD: float = 0.3
 
-    INGEST_EMBED_BATCH_SIZE: int = int(os.getenv("INGEST_EMBED_BATCH_SIZE", "64"))
-    INGEST_UPSERT_BATCH_SIZE: int = int(os.getenv("INGEST_UPSERT_BATCH_SIZE", "200"))
-    INGEST_LIMIT_DEFAULT: int = int(os.getenv("INGEST_LIMIT_DEFAULT", "0"))
+    INGEST_EMBED_BATCH_SIZE: int = 64
+    INGEST_UPSERT_BATCH_SIZE: int = 200
+    INGEST_LIMIT_DEFAULT: int = 0
 
 
 settings = Settings()
