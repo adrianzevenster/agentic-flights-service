@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: pytest tests/ -v --tb=short
+        env:
+          DATABASE_URL: postgresql+psycopg://x:x@localhost/x
+          OLLAMA_BASE_URL: http://localhost:11434
+          QDRANT_URL: http://localhost:6333
+          REDIS_URL: ""
+          OTEL_EXPORTER_ENDPOINT: ""
+          API_KEY: ""
+          ENABLE_RERANKER: "false"
+          ENABLE_SUMMARIZATION: "false"
+          CONTEXT_TOKEN_LIMIT: "500"
+
+  # Integration eval: runs on a separate workflow trigger or when services
+  # are available.  This job is intentionally separated from unit-tests so it
+  # does not block PRs that lack infrastructure access.
+  #
+  # To run locally:
+  #   docker-compose up -d postgres qdrant ollama redis
+  #   python scripts/build_eval_set.py
+  #   python scripts/eval_retrieval.py --min-hit-rate 0.7 --min-mrr 0.4
+  #
+  # Uncomment and configure the block below once you have a self-hosted runner
+  # with Ollama + Qdrant available:
+  #
+  # eval-gate:
+  #   name: Retrieval eval gate
+  #   runs-on: [self-hosted, gpu]
+  #   needs: unit-tests
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.13"
+  #         cache: pip
+  #     - run: pip install -r requirements.txt
+  #     - run: python scripts/eval_retrieval.py --min-hit-rate 0.70 --min-mrr 0.40 --max-p95-latency-ms 5000
+  #       env:
+  #         OLLAMA_BASE_URL: ${{ secrets.OLLAMA_BASE_URL }}
+  #         QDRANT_URL: ${{ secrets.QDRANT_URL }}
+  #         DATABASE_URL: ${{ secrets.DATABASE_URL }}

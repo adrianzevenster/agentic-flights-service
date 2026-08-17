@@ -36,6 +36,26 @@ services:
       - ollama_data:/root/.ollama
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4318:4318"     # OTLP HTTP receiver
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    restart: unless-stopped
+
   api:
     build:
       context: .
@@ -46,8 +66,12 @@ services:
       QDRANT_URL: http://qdrant:6333
       QDRANT_FLIGHTS_COLLECTION: flights
       DATABASE_URL: postgresql+psycopg://flight_user:flight_pass@postgres:5432/flight_service
+      REDIS_URL: redis://redis:6379
+      OTEL_EXPORTER_ENDPOINT: http://jaeger:4318
+      OTEL_SERVICE_NAME: flight-service
 
-      # App tuning (matches your config defaults; override here if needed)
+      # API_KEY: ""  # uncomment and set to enforce auth
+
       MAX_TOOL_RESULTS: "20"
       INGEST_EMBED_BATCH_SIZE: "64"
       INGEST_UPSERT_BATCH_SIZE: "200"
@@ -55,16 +79,21 @@ services:
       QDRANT_TIMEOUT_SECONDS: "30"
 
     depends_on:
-      - postgres
-      - qdrant
-      - ollama
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      ollama:
+        condition: service_started
+      redis:
+        condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
       - ./data:/app/data:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/readyz').read(); print('ok')\""]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/readyz').read()\""]
       interval: 5s
       timeout: 5s
       retries: 20

@@ -1,0 +1,148 @@
+[
+  {
+    "query": "morning United flight from Newark to Chicago",
+    "filters": {
+      "carrier": "UA",
+      "origin": "EWR",
+      "dest": "ORD"
+    },
+    "expected_flight_ids": []
+  },
+  {
+    "query": "Delta flight from LaGuardia to Atlanta",
+    "filters": {
+      "carrier": "DL",
+      "origin": "LGA",
+      "dest": "ATL"
+    },
+    "expected_flight_ids": [
+      "faec0441-e01d-5c06-8b44-d13c8d4b83e0",
+      "ac074b78-c6fe-5637-9dac-b124b87e4ba2",
+      "1df7ef3d-a496-5f64-8abf-40012418ca2f",
+      "cc1bbf61-77aa-5e16-802f-d6d9ee7ea53e",
+      "55069ac6-bbd9-5c66-b091-521ca0374494",
+      "4a78523c-6f39-5bda-937b-29f172c7a22e",
+      "0592ff52-1bea-5b9b-a72b-534481eb83cc",
+      "8a6674b9-81c1-55a7-8782-686936fb4445",
+      "65f3868f-efd6-5abf-bbeb-b07c56151dd2",
+      "f6b202a3-9e9e-5ada-a8ac-967c91724592"
+    ]
+  },
+  {
+    "query": "JetBlue morning flight from JFK to Fort Lauderdale",
+    "filters": {
+      "carrier": "B6",
+      "origin": "JFK",
+      "dest": "FLL"
+    },
+    "expected_flight_ids": []
+  },
+  {
+    "query": "American Airlines afternoon flight from LaGuardia to Dallas",
+    "filters": {
+      "carrier": "AA",
+      "origin": "LGA",
+      "dest": "DFW"
+    },
+    "expected_flight_ids": [
+      "59080ebb-f07c-5363-9a2a-4363b1cdc742",
+      "bc6a03fe-ba6a-5d7d-8f81-95064f06f388",
+      "6edf12bd-1d56-517e-9acd-61811d13bb9b",
+      "7ad6f345-89ab-541e-b7db-3afec796b51f",
+      "38711774-6c47-5719-8a27-c38f48ca352b",
+      "c42d2664-cacf-5662-99cc-4a74a4e828f3",
+      "6346112c-85cc-5ed9-8bf6-bb2c05e68e6b",
+      "0fe97100-5d94-51c6-8733-60cf99399088",
+      "8aa90ffa-883b-5bc8-8194-0168fc6e2671",
+      "9b473834-d843-523c-a5d2-59ae3fe497df"
+    ]
+  },
+  {
+    "query": "afternoon American Airlines flight from LaGuardia to Miami",
+    "filters": {
+      "carrier": "AA",
+      "origin": "LGA",
+      "dest": "MIA"
+    },
+    "expected_flight_ids": [
+      "5519c5b2-a06f-5f99-845c-9abb14f330bd",
+      "6cdc38b1-e494-518b-9836-01e835e94d0c",
+      "6db0d878-dce1-5055-8acc-e8334ecd111a",
+      "974c3a12-6756-56c7-a0ea-4d4818b89b7c",
+      "186b253c-3f55-5778-8837-c9de1d2b1c28",
+      "75cca0f4-be37-5aec-b3b5-18d534bff09d",
+      "c3594111-ba75-59a7-97ac-1affca75dbf9",
+      "aa356880-888d-5c3d-9694-73a9e84375ed"
+    ]
+  },
+  {
+    "query": "Southwest Airlines flight from Newark to Chicago Midway",
+    "filters": {
+      "carrier": "WN",
+      "origin": "EWR",
+      "dest": "MDW"
+    },
+    "expected_flight_ids": [
+      "62c464f5-dbad-5e59-ab12-1446d5d9c423",
+      "adab79d9-a651-5956-86eb-885a8f68cd14",
+      "3fbad0d0-7ed5-59d2-8031-f6f4bffe3541",
+      "7877e618-439f-5cab-8efd-28d53e30d6b6",
+      "4eb81909-4f49-5aee-a301-f5bfcc8d90b7",
+      "8f65474c-b4c7-5219-adfd-52232f3173f9",
+      "bd2a2d46-ede9-578f-a039-bf97e6a45393",
+      "bd208411-02cf-56b0-b344-1d1d1e978819",
+      "ee682cf0-91e9-569a-8fa5-7864483c4168",
+      "bd07add7-c310-57a5-b531-203b995a830d"
+    ]
+  },
+  {
+    "query": "US Airways morning flight from Newark to Charlotte",
+    "filters": {
+      "carrier": "US",
+      "origin": "EWR",
+      "dest": "CLT"
+    },
+    "expected_flight_ids": [
+      "c8e6f185-ba74-5535-a4e2-5fe72983379a"
+    ]
+  },
+  {
+    "query": "evening Envoy Air flight from LaGuardia to Atlanta",
+    "filters": {
+      "carrier": "MQ",
+      "origin": "LGA",
+      "dest": "ATL"
+    },
+    "expected_flight_ids": [
+      "50a1a8e1-0c6b-55cb-8733-53c7816a07e2",
+      "138e0bb9-9f8f-565b-bf8c-f3cc593b6c40",
+      "aa5751f0-5b86-5bfe-9d12-788048d65db2",
+      "feda7683-db78-54b5-a90e-d35c9ae4edcd",
+      "fd152d34-9934-58bd-b6b5-3c6047d1c39a"
+    ]
+  },
+  {
+    "query": "United early morning departure from LaGuardia to Houston",
+    "filters": {
+      "carrier": "UA",
+      "origin": "LGA",
+      "dest": "IAH"
+    },
+    "expected_flight_ids": [
+      "a44801e7-cac0-5144-a490-ba7ed330d122",
+      "6f016ae4-4888-5a6e-8920-f6b2dd26ffbb",
+      "d60a8a5d-f70a-5f9a-953f-72bf13e418fa"
+    ]
+  },
+  {
+    "query": "JetBlue afternoon flight from JFK to Orlando",
+    "filters": {
+      "carrier": "B6",
+      "origin": "JFK",
+      "dest": "MCO"
+    },
+    "expected_flight_ids": [
+      "9a44c5f3-b93a-5ed2-ac2d-bf83bfb37196"
+    ]
+  }
+]
