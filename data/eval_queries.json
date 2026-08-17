@@ -6,7 +6,18 @@
       "origin": "EWR",
       "dest": "ORD"
     },
-    "expected_flight_ids": []
+    "expected_flight_ids": [
+      "4ec2a5b6-44d2-5410-abd2-62cce30e1b77",
+      "3b6866e2-a75a-554a-8179-e1fad9176ecc",
+      "771ff58b-d6cc-5bb6-97dc-416abf24b2b9",
+      "6179bd02-6aa4-55a1-9587-6deaf85bf5f4",
+      "ebdf0a65-b137-5396-9d79-227dafd122e1",
+      "743ecd15-9b53-5541-bf9b-cb10b1eba599",
+      "02936f27-9683-503b-baa0-f7de0a5027ca",
+      "26379a3e-ec33-564e-a2c1-2d8d4342d584",
+      "ac873bef-6677-5af4-9d1a-265dd707c1e2",
+      "e9ff3c42-dd1e-54d2-8eb0-0a9a0e00afb2"
+    ]
   },
   {
     "query": "Delta flight from LaGuardia to Atlanta",
@@ -35,7 +46,18 @@
       "origin": "JFK",
       "dest": "FLL"
     },
-    "expected_flight_ids": []
+    "expected_flight_ids": [
+      "cec8dc76-dfa8-57ab-96ed-5c0ece6b09cd",
+      "2d26367e-2c94-51ca-b971-6a89479c0cf0",
+      "e1619c82-6dab-51e9-b80e-a19360de4a71",
+      "df08dc23-11e6-518f-b502-a8b5ecfa467a",
+      "bdc40cec-cbc0-54ea-b4d2-e01e8e627afe",
+      "4b805b98-8d82-58bd-b5c6-1fa30e9877a3",
+      "7e41fe23-3fe9-516f-a7d3-2bcd18542597",
+      "b162d575-c2ac-5078-9ce4-f4d214f0a2e9",
+      "4ed38f51-1ce3-5968-8679-0b219a1498ac",
+      "4708ad90-de28-5aea-99e5-6b66fec2e9bd"
+    ]
   },
   {
     "query": "American Airlines afternoon flight from LaGuardia to Dallas",

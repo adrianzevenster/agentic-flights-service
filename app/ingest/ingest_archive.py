@@ -108,8 +108,8 @@ def ensure_collection(vector_size: int) -> None:
                 field_name=field,
                 field_schema=schema,
             )
-        except Exception:
-            pass
+        except Exception as exc:
+            log.warning("Failed to create payload index for field %r: %s", field, exc)
 
     log.info("Created collection '%s'.", settings.QDRANT_FLIGHTS_COLLECTION)
 

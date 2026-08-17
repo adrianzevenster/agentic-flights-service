@@ -6,7 +6,8 @@ import uuid
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -14,13 +15,14 @@ from sqlalchemy import text
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api.schemas import ChatIn, SearchFlightsIn, CreateBookingIn, CancelBookingIn
-from app.api.chat import handle_chat, stream_chat, get_metrics
+from app.api.chat import handle_chat, stream_chat
 from app.api import tools
 from app.booking.db import engine
 from app.booking.init_db import init_db
 from app.core.auth import require_api_key
 from app.core.config import settings
 from app.core.http_client import get_http_client, close_http_client
+from app.core.metrics import make_registry
 from app.core.redis_client import close_redis
 from app.core.logging_config import configure_logging, request_id_var
 from app.core.tracing import configure_tracing
@@ -41,7 +43,20 @@ class _RequestIDMiddleware(BaseHTTPMiddleware):
         return response
 
 
-limiter = Limiter(key_func=get_remote_address)
+def _rate_limit_key(request: Request) -> str:
+    """Rate limit by API key when set; fall back to remote IP.
+
+    Using the API key as the bucket key means limits are per-caller, not
+    per-IP — which is correct behind a load balancer where all traffic
+    shares one source address.
+    """
+    key = request.headers.get("X-API-Key")
+    if key and settings.API_KEY:
+        return key
+    return get_remote_address(request)
+
+
+limiter = Limiter(key_func=_rate_limit_key)
 
 
 @asynccontextmanager
@@ -126,18 +141,29 @@ async def get_booking(booking_id: str):
 # ─── Observability ────────────────────────────────────────────────────────────
 
 @app.get("/metrics")
-async def agent_metrics():
-    """Return agent-level operational counters.
+async def prometheus_metrics():
+    """Prometheus-format metrics endpoint.
 
-    Returns:
-        Dict with ``tool_cap_hits``: number of agentic turns that exhausted
-        the iteration cap without producing a text response.  A rising rate
-        indicates prompt drift or a data distribution shift.
+    Expose all registered counters/histograms for scraping.  In multi-worker
+    deployments set PROMETHEUS_MULTIPROC_DIR so per-worker .db files are
+    aggregated.  The ``flight_agent_tool_cap_hits_total`` counter is the
+    primary signal for prompt drift or retrieval regressions.
     """
-    return get_metrics()
+    data = generate_latest(make_registry())
+    return Response(content=data, media_type=CONTENT_TYPE_LATEST)
 
 
 # ─── Health ───────────────────────────────────────────────────────────────────
+
+@app.get("/livez")
+async def livez():
+    """Liveness probe — returns 200 as long as the process is running.
+
+    Does not check external dependencies.  Kubernetes should restart the pod
+    only when this fails, not when a downstream service is temporarily down.
+    """
+    return {"ok": True}
+
 
 def _check_postgres() -> None:
     with engine.connect() as conn:
@@ -172,6 +198,16 @@ async def readyz():
     except Exception as exc:
         checks["postgres"] = str(exc)
         healthy = False
+
+    if settings.REDIS_URL:
+        try:
+            from app.core.redis_client import get_redis
+            r = await get_redis()
+            await r.ping()
+            checks["redis"] = "ok"
+        except Exception as exc:
+            checks["redis"] = str(exc)
+            healthy = False
 
     if not healthy:
         raise HTTPException(status_code=503, detail={"ok": False, "checks": checks})

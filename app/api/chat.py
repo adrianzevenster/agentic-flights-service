@@ -52,7 +52,6 @@ import asyncio
 import json
 import logging
 import re
-import threading
 import time
 import uuid
 from collections import OrderedDict
@@ -64,6 +63,7 @@ from pydantic import ValidationError
 from app.api import tools as _tools
 from app.core.config import settings
 from app.core.logging_config import request_id_var
+from app.core.metrics import tool_cap_hits
 
 log = logging.getLogger(__name__)
 
@@ -184,28 +184,7 @@ _MAX_SESSIONS = 500
 _SESSION_TTL = 3600.0
 _MAX_TOOL_ITERATIONS = 10
 
-_cap_hit_count: int = 0
-_metrics_lock = threading.Lock()
 
-
-def _increment_cap_hits() -> None:
-    global _cap_hit_count
-    with _metrics_lock:
-        _cap_hit_count += 1
-
-
-def get_metrics() -> dict[str, int]:
-    """Return a snapshot of agent-level counters for the /metrics endpoint.
-
-    Returns:
-        Dict with key ``tool_cap_hits``: number of agentic turns that exhausted
-        _MAX_TOOL_ITERATIONS without producing a text response.
-    """
-    with _metrics_lock:
-        return {"tool_cap_hits": _cap_hit_count}
-
-
-# ─── Token counting ───────────────────────────────────────────────────────────
 
 def _count_tokens(history: list[dict]) -> int:
     """Estimate the token count of a serialised conversation history.
@@ -621,8 +600,8 @@ async def _run_tool_loop(
 
         await _sessions.save(session_id, history)
 
-    _increment_cap_hits()
-    log.warning("chat.max_iterations session=%s cap_hit_total=%d", session_id, _cap_hit_count)
+    tool_cap_hits.inc()
+    log.warning("chat.max_iterations session=%s", session_id)
     return history, tool_results, None
 
 
