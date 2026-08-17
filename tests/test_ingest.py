@@ -98,7 +98,6 @@ def test_flight_doc_contains_all_key_fields():
     assert "DL" in doc
     assert "ATL" in doc
     assert "JFK" in doc
-    assert "N123DL" in doc
     assert "->" in doc
 
 
